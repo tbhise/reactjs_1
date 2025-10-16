@@ -9,12 +9,6 @@ function Users() {
   const [totalRows, setTotalRows] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
 
-  // const columns = [
-  //   { name: "ID", selector: (row) => row.id, sortable: true },
-  //   { name: "Name", selector: (row) => row.fullName, sortable: true },
-  //   { name: "Email", selector: (row) => row.email_id, sortable: true },
-  //   // Add more columns here for your data
-  // ];
   const dateColumns = ["createdAt", "updatedAt"];
   const columns = data[0]
     ? [
