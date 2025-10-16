@@ -52,13 +52,13 @@ function AppContent() {
               Laravel
             </Link>
             <div className="collapse navbar-collapse">
-              <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-                <li className="nav-item">
+              <ul className="navbar-nav me-auto mb-2 mb-lg-0 ">
+                <li className="nav-item ">
                   <NavLink
                     to="/home"
                     end
                     className={({ isActive }) =>
-                      isActive ? "nav-link active" : "nav-link"
+                      isActive ? "nav-link active text-white" : "text-white nav-link"
                     }
                   >
                     Home
@@ -69,7 +69,7 @@ function AppContent() {
                     to="/users"
                     end
                     className={({ isActive }) =>
-                      isActive ? "nav-link active" : "nav-link"
+                      isActive ? "nav-link active text-white" : " text-white nav-link"
                     }
                   >
                     Users
@@ -86,7 +86,7 @@ function AppContent() {
           </div>
         </nav>
       )}
-      <div className="container-fluid mt-4">
+      <div className="container-fluid mt-4 ">
         <Routes>
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />

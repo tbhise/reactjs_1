@@ -1,3 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
 .rdt_TableCol {
   border: 1px solid rgb(153, 153, 153) !important;
 }

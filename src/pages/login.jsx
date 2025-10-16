@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import "../assets/custom.css";
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -46,14 +47,14 @@ const Login = () => {
 
   useEffect(() => {
     if (sessionStorage.getItem("showLogOutToast")) {
-      toast.success("Logged out successfully..!"); 
+      toast.success("Logged out successfully..!");
       sessionStorage.removeItem("showLogOutToast");
     }
   }, []);
 
   return (
-    <div className="container m-auto ">
-      <div className="card">
+    <div className="container m-auto">
+      <div className="card shadow-lg">
         <div className="card-body">
           <form onSubmit={handleSubmit}>
             <div className="mb-3">
@@ -80,7 +81,7 @@ const Login = () => {
               />
             </div>
 
-            <div className="mb-3">
+            <div className="mb-3 flex flex-wrap justify-center">
               <button className="btn btn-primary"> Login</button>
             </div>
           </form>
