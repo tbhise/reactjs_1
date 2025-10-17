@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import MainLayout from "../Layouts/MainLayout";
+import EditUserModal from "../Modal/EditUserModal";
+import { toast } from "react-toastify";
 function Users() {
   const [data, setData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -8,8 +10,13 @@ function Users() {
   const [loading, setLoading] = useState(true);
   const [totalRows, setTotalRows] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(100);
-
+  const [userData, setUserData] = useState({});
   const dateColumns = ["createdAt", "updatedAt"];
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleClose = () => setIsModalOpen(false);
+
   const columns = data[0]
     ? [
         ...Object.keys(data[0]).map((key) => ({
@@ -21,22 +28,19 @@ function Users() {
               ? new Date(row[key]).toLocaleString()
               : row[key],
         })),
-
         {
           name: "Actions",
           cell: (row) => (
-            <div>
+            <div className="flex gap-2">
               <button
-                className="btn btn-sm btn-primary me-2"
+                className="px-3 py-1 text-white bg-blue-600 hover:bg-blue-700 rounded text-sm"
                 onClick={() => handleEdit(row)}
-                type="button" // good practice inside forms
               >
                 Edit
               </button>
               <button
-                className="btn btn-sm btn-danger"
+                className="px-3 py-1 text-white bg-red-600 hover:bg-red-700 rounded text-sm"
                 onClick={() => handleDelete(row)}
-                type="button"
               >
                 Delete
               </button>
@@ -49,29 +53,25 @@ function Users() {
 
   useEffect(() => {
     const fetchData = async () => {
-      var token = localStorage.getItem("token");
-
+      let token = localStorage.getItem("token");
       setLoading(true);
       try {
         const res = await fetch(
           `http://localhost:5000/api/users?page=${currentPage}&limit=${rowsPerPage}`,
           {
-            method: "GET",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
-
         if (!res.ok) throw new Error("Failed to fetch data");
         const data = await res.json();
-
         setData(data.rows);
         setTotalRows(data.total);
-        setLoading(false);
       } catch (err) {
         setError(err.message);
+      } finally {
         setLoading(false);
       }
     };
@@ -85,101 +85,113 @@ function Users() {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  if (loading) return <div>Loading data...</div>;
-  if (error) return <div className="text-danger">Error: {error}</div>;
+  const handleEdit = (row) => {
+    console.log(row);
+    setUserData(row);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdate = async (updatedUser) => {
+    setData((prevData) =>
+      prevData.map((user) => (user.id === updatedUser.id ? updatedUser : user))
+    );
+    toast.success("Record updated successfully..!");
+
+    handleClose();
+  };
 
   return (
-    <>
-      <MainLayout>
-        <div className="kt-container-fixed">
-          <div className="flex flex-wrap items-center lg:items-end justify-between- gap-5 pb-7.5">
-            <div className="flex flex-col justify-center gap-2">
-              <h1 className="text-xl font-medium leading-none text-mono">
-                Users
-              </h1>
-              <div className="flex items-center gap-2 text-sm font-normal text-secondary-foreground">
-                <div className="card ">
-                  <div className="card-body col-12">
-                    <DataTable
-                      columns={columns}
-                      data={data}
-                      progressPending={loading}
-                      highlightOnHover
-                      striped
-                      pagination={false}
-                      responsive
-                    />
-                  </div>
+    <MainLayout>
+      <div className="w-full min-h-screen ">
+        <div className="px-4">
+          <h1 className="text-2xl font-semibold mb-4">Users</h1>
 
-                  {/* Rows per page dropdown */}
-                  <div className="d-flex justify-content-between align-items-center">
-                    <div>
-                      <label className="me-2">Rows per page:</label>
-                      <select
-                        value={rowsPerPage}
-                        onChange={(e) => {
-                          setRowsPerPage(Number(e.target.value));
-                          setCurrentPage(1);
-                        }}
-                      >
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="200">200</option>
-                      </select>
-                    </div>
+          {/* Data Table */}
+          <div className="bg-white shadow rounded-lg overflow-x-auto">
+            <DataTable
+              columns={columns}
+              data={data}
+              progressPending={loading}
+              highlightOnHover
+              striped
+              pagination={false}
+              responsive
+            />
+          </div>
 
-                    {/* Pagination controls */}
-                    <nav>
-                      <ul className="pagination mb-0">
-                        <li
-                          className={`page-item ${
-                            currentPage === 1 && "disabled"
-                          }`}
-                        >
-                          <button
-                            className="page-link"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                          >
-                            Previous
-                          </button>
-                        </li>
-                        {[...Array(totalPages)].map((_, i) => (
-                          <li
-                            key={i}
-                            className={`page-item ${
-                              currentPage === i + 1 && "active"
-                            }`}
-                          >
-                            <button
-                              className="page-link"
-                              onClick={() => handlePageChange(i + 1)}
-                            >
-                              {i + 1}
-                            </button>
-                          </li>
-                        ))}
-                        <li
-                          className={`page-item ${
-                            currentPage === totalPages && "disabled"
-                          }`}
-                        >
-                          <button
-                            className="page-link"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                          >
-                            Next
-                          </button>
-                        </li>
-                      </ul>
-                    </nav>
-                  </div>
-                </div>
-              </div>
+          {/* Controls */}
+          <div className="flex flex-col md:flex-row items-center justify-between mt-4 gap-4">
+            {/* Rows per page */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium">Rows per page:</label>
+              <select
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+              >
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+              </select>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded border text-sm ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+              >
+                Previous
+              </button>
+
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`px-3 py-1 rounded border text-sm ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "bg-white hover:bg-gray-100"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded border text-sm ${
+                  currentPage === totalPages
+                    ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                    : "bg-white hover:bg-gray-100"
+                }`}
+              >
+                Next
+              </button>
             </div>
           </div>
+
+          {/* Error Handling */}
+          {error && <p className="mt-4 text-red-600">{error}</p>}
         </div>
-      </MainLayout>
-    </>
+      </div>
+
+      <EditUserModal
+        isModalOpen={isModalOpen}
+        userData={userData}
+        handleClose={handleClose}
+        onUpdate={handleUpdate}
+      />
+    </MainLayout>
   );
 }
 

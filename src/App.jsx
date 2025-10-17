@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Users from "./components/Users/Users";
 import Login from "./components/login/Login";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function LocationAwareApp() {
   const location = useLocation();
@@ -43,6 +45,7 @@ function App() {
   return (
     <BrowserRouter>
       <LocationAwareApp />
+      <ToastContainer position="top-right" autoClose={3000} />
     </BrowserRouter>
   );
 }
